@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'explorer',
-    'brunch.generator',
+    'brunch',
 ]
 
 MIDDLEWARE = [
