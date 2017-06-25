@@ -45,3 +45,6 @@ class BaseSource(BaseAuthorModel):
 
 class ExplorerSource(BaseSource):
     source = models.OneToOneField('explorer.Query')
+
+    def __unicode__(self):
+        return '%s: %s' % ('Source', self.source.title)
