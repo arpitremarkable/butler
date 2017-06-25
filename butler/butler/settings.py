@@ -121,6 +121,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+EXPLORER_SCHEMA_BUILDERS = [
+    ('sqlite', 'explorer.schema.SQLiteSchema'),
+    ('postgresql', 'explorer.schema.PostgreSQLSchema'),
+    ('redshift', 'explorer.schema.PostgreSQLSchema'),
+    ('mysql', 'explorer.schema.MySQLSchema'),
+]
+
 try:
     from local_settings import *  # noqa
 except ImportError:
