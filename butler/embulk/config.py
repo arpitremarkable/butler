@@ -8,7 +8,7 @@ class EmbulkConfig(object):
     pass
 
 
-class EmbulkDatabaseConfig(object):
+class DatabaseConfig(object):
 
     def __init__(self, using, **options):
         from django.conf import settings
@@ -26,27 +26,27 @@ class EmbulkDatabaseConfig(object):
         self.config.update(options)
 
 
-class EmbulkInputConfig(EmbulkConfig):
+class InputConfig(EmbulkConfig):
     pass
 
 
-class EmbulkOutputConfig(EmbulkConfig):
+class OutputConfig(EmbulkConfig):
     pass
 
 
-class EmbulkDatabaseInputConfig(EmbulkDatabaseConfig, EmbulkInputConfig):
+class EmbulkDatabaseInputConfig(DatabaseConfig, InputConfig):
     pass
 
 
-class EmbulkDatabaseOutputConfig(EmbulkDatabaseConfig, EmbulkOutputConfig):
+class DatabaseOutputConfig(DatabaseConfig, OutputConfig):
     pass
 
 
-class EmbulkRedshiftOutputConfig(EmbulkDatabaseOutputConfig):
+class RedshiftOutputConfig(DatabaseOutputConfig):
 
     def __init__(self, **options):
         from django.conf import settings
-        super(EmbulkRedshiftOutputConfig, self).__init__(**options)
+        super(RedshiftOutputConfig, self).__init__(**options)
         self.config.update({
             'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
             'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY,
@@ -57,7 +57,7 @@ class EmbulkRedshiftOutputConfig(EmbulkDatabaseOutputConfig):
         })
 
 
-class EmbulkCSVOutputConfig(EmbulkOutputConfig):
+class CSVOutputConfig(OutputConfig):
 
     def __init__(self, file_path=tempfile.gettempdir(), **options):
         self.config = {
