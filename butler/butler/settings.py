@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'explorer',
     'brunch',
-    'embulk',
 ]
 
 MIDDLEWARE = [

@@ -3,19 +3,20 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from brunch.models import ExplorerSource
+from brunch.forms import DatabaseColumnOptionModelForm, DatabaseConfigModelForm
+from brunch.models import DatabaseColumnOption, DatabaseConfig
 
 
-class ExplorerSourceAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'link', )
-    list_display_links = ('__unicode__', 'link', )
-    list_select_related = ('query', )
-    list_filter = ('query__title',)
-    fields = ('query', )
-
-    def link(self, instance):
-        return '<a href="%s" target="_blank">open</a>' % (instance.query.get_absolute_url(), )
-    link.allow_tags = True
+class DatabaseColumnOptionInlineForm(admin.TabularInline):
+    form = DatabaseColumnOptionModelForm
+    model = DatabaseColumnOption
 
 
-admin.site.register(ExplorerSource, ExplorerSourceAdmin)
+class DatabaseConfigAdmin(admin.ModelAdmin):
+    form = DatabaseConfigModelForm
+    inlines = [
+        DatabaseColumnOptionInlineForm,
+    ]
+
+
+admin.site.register(DatabaseConfig, DatabaseConfigAdmin)

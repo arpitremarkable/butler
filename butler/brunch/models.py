@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.contrib.postgres import fields as pg_fields
 from django.db import models
+
+from brunch.utils import to_namedtuple
 
 
 # Create your models here.
@@ -39,14 +42,28 @@ class BaseAuthorModel(BaseModel):
         abstract = True
 
 
-class BaseSource(BaseAuthorModel):
-    pass
+class DatabaseConfig(BaseAuthorModel):
+    name = models.CharField(max_length=255)
+    connection_name = models.CharField(
+        max_length=50, blank=False, choices=to_namedtuple(settings.DATABASES.keys()).__dict__.items()
+    )
+    select = models.CharField(max_length=1024, blank=False)
+    table = models.CharField(max_length=128, blank=False)
+    where = models.CharField(max_length=1024, blank=True)
+    batch_size = models.IntegerField(blank=False, default=10000)
+    incremental_columns = pg_fields.ArrayField(
+        models.CharField(max_length=50), default=list, blank=True, help_text='Column name(s) used in select'
+    )
 
 
-class ExplorerSource(BaseSource):
-    query = models.OneToOneField('explorer.Query')
-    # types = models.ManyToManyField(Feature, blank=True, through='PlanFeature')
-    # batch = models.PositiveIntegerField(null=True, blank=True)
+class DatabaseColumnOption(BaseAuthorModel):
+    value_types = to_namedtuple(('long', 'double', 'float', 'decimal', 'boolean', 'string', 'json', 'date', 'time', 'timestamp', ))
+    types = to_namedtuple(('boolean', 'long', 'double', 'string', 'json', 'timestamp', ))
 
-    def __unicode__(self):
-        return self.query
+    config = models.ForeignKey(DatabaseConfig)
+    name = models.CharField(max_length=255, help_text='Column name(s) used in select')
+    value_type = models.CharField(blank=True, max_length=50, verbose_name='Cast as', choices=value_types.__dict__.items())
+    type = models.CharField(blank=True, max_length=50, verbose_name='Convert to', choices=types.__dict__.items())
+    timestamp_format = models.CharField(
+        blank=True, max_length=50, help_text='default : %Y-%m-%d for date, %H:%M:%S for time, %Y-%m-%d %H:%M:%S for timestamp'
+    )
