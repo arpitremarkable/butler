@@ -34,7 +34,7 @@ class OutputConfig(EmbulkConfig):
     pass
 
 
-class EmbulkDatabaseInputConfig(DatabaseConfig, InputConfig):
+class DatabaseInputConfig(DatabaseConfig, InputConfig):
     pass
 
 

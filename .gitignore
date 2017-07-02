@@ -99,3 +99,13 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# sqlite
+*.sqlite*
+
+# embulk
+config_diff.yml
+try1
+
+# symbolic links
+/manage.py

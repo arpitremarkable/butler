@@ -44,7 +44,9 @@ class BaseSource(BaseAuthorModel):
 
 
 class ExplorerSource(BaseSource):
-    source = models.OneToOneField('explorer.Query')
+    query = models.OneToOneField('explorer.Query')
+    # types = models.ManyToManyField(Feature, blank=True, through='PlanFeature')
+    # batch = models.PositiveIntegerField(null=True, blank=True)
 
     def __unicode__(self):
-        return '%s: %s' % ('Source', self.source.title)
+        return self.query
