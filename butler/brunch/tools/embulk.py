@@ -1,8 +1,6 @@
 import os
 import tempfile
 
-import yaml
-
 
 class EmbulkConfig(object):
     pass
@@ -39,22 +37,18 @@ class DatabaseInputConfig(DatabaseConfig, InputConfig):
 
 
 class DatabaseOutputConfig(DatabaseConfig, OutputConfig):
-    pass
-
-
-class RedshiftOutputConfig(DatabaseOutputConfig):
-
     def __init__(self, **options):
-        from django.conf import settings
-        super(RedshiftOutputConfig, self).__init__(**options)
-        self.config.update({
-            'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
-            'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY,
-            'iam_user_name': settings.IAM_USER_NAME,
-            's3_bucket': self.connection.settings_dict['S3_BUCKET'],
-            's3_key_prefix': self.connection.settings_dict['S3_KEY_PREFIX'],
-            'temp_schema': self.connection.settings_dict['LOADING_SCHEMA'],
-        })
+        super(DatabaseOutputConfig, self).__init__(**options)
+        if self.config['type'] == 'redshift':
+            from django.conf import settings
+            self.config.update({
+                'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
+                'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY,
+                'iam_user_name': settings.IAM_USER_NAME,
+                's3_bucket': self.connection.settings_dict['S3_BUCKET'],
+                's3_key_prefix': self.connection.settings_dict['S3_KEY_PREFIX'],
+                'temp_schema': self.connection.settings_dict['LOADING_SCHEMA'],
+            })
 
 
 class CSVOutputConfig(OutputConfig):
@@ -68,14 +62,3 @@ class CSVOutputConfig(OutputConfig):
             },
         }
         self.config.update(options)
-
-
-def build_config(input, output):
-    def get_yaml(dic):
-        return yaml.dump(dic)
-
-    config = {
-        'in': input.config,
-        'out': output.config,
-    }
-    print(yaml.dump(config))

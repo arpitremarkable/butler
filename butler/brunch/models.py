@@ -61,6 +61,7 @@ class GenericBaseModel(BaseAuthorModel):
 
 
 class Config(GenericBaseModel):
+    NATURE = 'generic'
     name = models.CharField(max_length=255, unique=True)
 
 
@@ -73,6 +74,7 @@ class TargetConfig(Config):
 
 
 class DatabaseSourceConfig(SourceConfig):
+    NATURE = 'database'
     connection_names = to_namedtuple(settings.DATABASES.keys())
 
     connection_name = models.CharField(
@@ -81,6 +83,7 @@ class DatabaseSourceConfig(SourceConfig):
     select = models.CharField(max_length=1024, blank=False)
     table = models.CharField(max_length=128, blank=False)
     where = models.CharField(max_length=1024, blank=True)
+    order_by = models.CharField(max_length=128, blank=True)
     batch_size = models.IntegerField(blank=False, default=10000)
     incremental_columns = pg_fields.ArrayField(
         models.CharField(max_length=50), default=list, blank=True, help_text='Column name(s) used in select'
@@ -91,6 +94,7 @@ class DatabaseSourceConfig(SourceConfig):
 
 
 class DatabaseTargetConfig(TargetConfig):
+    NATURE = 'database'
     modes = to_namedtuple(('insert', 'insert_direct', 'truncate_insert', 'replace', 'merge', ))
 
     connection_name = models.CharField(
