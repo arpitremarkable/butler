@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 
 from brunch.utils import to_namedtuple
 
@@ -42,8 +43,12 @@ class BaseAuthorModel(BaseModel):
         abstract = True
 
 
-class DatabaseConfig(BaseAuthorModel):
-    name = models.CharField(max_length=255)
+class Config(BaseAuthorModel):
+    pass
+
+
+class DatabaseConfig(Config):
+    name = models.CharField(max_length=255, unique=True)
     connection_name = models.CharField(
         max_length=50, blank=False, choices=to_namedtuple(settings.DATABASES.keys()).__dict__.items()
     )
@@ -67,3 +72,20 @@ class DatabaseColumnOption(BaseAuthorModel):
     timestamp_format = models.CharField(
         blank=True, max_length=50, help_text='default : %Y-%m-%d for date, %H:%M:%S for time, %Y-%m-%d %H:%M:%S for timestamp'
     )
+
+
+class ScheduledTask(PeriodicTask):
+    config = models.OneToOneField(Config)
+
+    def save(self, *args, **kwargs):
+        import json
+        from brunch.tasks import execute_config
+        self.name = self.config.name
+        self.task = "%s.%s" % (execute_config.__module__, execute_config.__name__)
+        self.kwargs = json.dumps({
+            'config_id': self.config.id,
+        })
+        superb = super(ScheduledTask, self).save(*args, **kwargs)
+        # PeriodicTask.save(self, *args, **kwargs)
+        self.periodictask_ptr.save()
+        return superb
