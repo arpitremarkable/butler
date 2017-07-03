@@ -5,7 +5,7 @@ from django import forms
 
 class BaseModelForm(forms.ModelForm):
     class Meta:
-        exclude = ('creator', 'editor', )
+        exclude = ('creator', 'editor', '_content_type', )
 
 
 class DatabaseSourceConfigModelForm(BaseModelForm):

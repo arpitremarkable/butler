@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django_celery_beat.models import PeriodicTask
@@ -43,7 +45,19 @@ class BaseAuthorModel(BaseModel):
         abstract = True
 
 
-class Config(BaseAuthorModel):
+class GenericBaseModel(BaseAuthorModel):
+    _content_type = models.ForeignKey(ContentType)
+    special_object = GenericForeignKey('_content_type', 'id')
+
+    def save(self, *args, **kwargs):
+        self.special_object = self
+        return super(GenericBaseModel, self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class Config(GenericBaseModel):
     name = models.CharField(max_length=255, unique=True)
 
     def __unicode__(self):
