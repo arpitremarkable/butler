@@ -6,6 +6,21 @@ import os
 import yaml
 
 
+def clean_dict(dic):
+    return dict(filter(lambda d: bool(d[1]), dic.items()))
+
+
+def get_column_options(config):
+    options = {}
+    for option in config.column_options.all():
+        options[option.name] = clean_dict({
+            'value_type': option.value_type,
+            'type': option.type,
+            'timestamp_format': option.timestamp_format,
+        })
+    return options
+
+
 def execute(source_config, target_config, task):
     if source_config.NATURE == 'database':
         input = DatabaseInputConfig(
@@ -17,6 +32,7 @@ def execute(source_config, target_config, task):
             fetch_rows=source_config.batch_size,
             incremental=bool(source_config.incremental_columns),
             incremental_columns=source_config.incremental_columns,
+            column_options=get_column_options(source_config),
         )
     else:
         raise Exception('Not implemented %s input type' % (source_config.NATURE, ))
@@ -27,16 +43,15 @@ def execute(source_config, target_config, task):
             table=target_config.table,
             mode=target_config.mode,
             merge_keys=target_config.merge_keys,
+            column_options=get_column_options(target_config),
         )
     else:
         raise Exception('Not implemented %s output type' % (target_config.NATURE, ))
 
     def build_config(input, output):
-        def clean(dic):
-            return dict(filter(lambda d: bool(d[1]), dic.items()))
         config = {
-            'in': clean(input.config),
-            'out': clean(output.config),
+            'in': clean_dict(input.config),
+            'out': clean_dict(output.config),
         }
         return config
 

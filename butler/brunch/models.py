@@ -117,7 +117,7 @@ class DatabaseColumnOption(BaseAuthorModel):
     value_types = to_namedtuple(('long', 'double', 'float', 'decimal', 'boolean', 'string', 'json', 'date', 'time', 'timestamp', ))
     types = to_namedtuple(('boolean', 'long', 'double', 'string', 'json', 'timestamp', ))
 
-    config = models.ForeignKey(Config)
+    config = models.ForeignKey(Config, related_name='column_options')
     name = models.CharField(max_length=255, help_text='Column name(s) used in select')
     value_type = models.CharField(blank=True, max_length=50, verbose_name='Cast as', choices=value_types.__dict__.items())
     type = models.CharField(blank=True, max_length=50, verbose_name='Convert to', choices=types.__dict__.items())
