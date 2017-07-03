@@ -34,6 +34,12 @@ def execute(source_config, target_config, task):
             incremental_columns=source_config.incremental_columns,
             column_options=get_column_options(source_config),
         )
+    elif source_config.NATURE == 'explorer':
+        input = DatabaseInputConfig(
+            using=settings.EXPLORER_CONNECTION_NAME,
+            query=source_config.query.sql,
+            column_options=get_column_options(source_config),
+        )
     else:
         raise Exception('Not implemented %s input type' % (source_config.NATURE, ))
 

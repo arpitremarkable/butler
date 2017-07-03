@@ -93,6 +93,15 @@ class DatabaseSourceConfig(SourceConfig):
         return "%s:%s (%s)" % (self.connection_name, self.table, self.name)
 
 
+class ExplorerSourceConfig(SourceConfig):
+    NATURE = 'explorer'
+    query = models.OneToOneField('explorer.Query')
+    batch_size = models.IntegerField(blank=False, default=10000)
+
+    def __unicode__(self):
+        return "%s" % (self.name, )
+
+
 class DatabaseTargetConfig(TargetConfig):
     NATURE = 'database'
     modes = to_namedtuple(('insert', 'insert_direct', 'truncate_insert', 'replace', 'merge', ))

@@ -5,7 +5,8 @@ from django.contrib import admin
 
 from brunch.forms import BaseModelForm
 from brunch.models import (DatabaseColumnOption, DatabaseSourceConfig,
-                           DatabaseTargetConfig, ScheduledTask)
+                           DatabaseTargetConfig, ExplorerSourceConfig,
+                           ScheduledTask)
 
 
 class DatabaseColumnOptionInlineForm(admin.TabularInline):
@@ -29,4 +30,5 @@ class ConfigAdmin(admin.ModelAdmin):
 
 admin.site.register(DatabaseSourceConfig, ConfigAdmin)
 admin.site.register(DatabaseTargetConfig, ConfigAdmin)
+admin.site.register(ExplorerSourceConfig, ConfigAdmin)
 admin.site.register(ScheduledTask, ScheduledTaskInlineForm)
