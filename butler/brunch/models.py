@@ -60,23 +60,51 @@ class GenericBaseModel(BaseAuthorModel):
 class Config(GenericBaseModel):
     name = models.CharField(max_length=255, unique=True)
 
-    def __unicode__(self):
-        if hasattr(self, 'sourceconfig'):
-            return "Source: %s" % (self.sourceconfig, )
-        elif hasattr(self, 'targetconfig'):
-            return "Target: %s" % (self.targetconfig, )
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        kwargs['use_class'] = kwargs['use_class'] if 'use_class' in kwargs else Config
+        if not issubclass(cls, kwargs['use_class']):
+            return super(kwargs['use_class'], cls).__new__(cls, *args, **kwargs)
+        model = cls
+
+        def fields():
+            return (f for f in cls._meta.concrete_fields)
+
+        for i, field in enumerate(fields()):
+            if getattr(field, 'related_model', None) is ContentType:
+                # db to py object
+                try:
+                    _content_type_id = args[i]
+                    if _content_type_id is models.base.DEFERRED:
+                        break
+                    _content_type = ContentType._default_manager.get(pk=_content_type_id)
+                except ContentType.DoesNotExist:
+                    break
+                except IndexError:
+                    try:
+                        _content_type = kwargs[field.name]
+                    except KeyError:
+                        try:
+                            _content_type = kwargs[field.attname]
+                            if _content_type_id is models.base.DEFERRED:
+                                break
+                            _content_type = ContentType._default_manager.get(
+                                pk=_content_type_id
+                            )
+                        except (KeyError, ContentType.DoesNotExist):
+                            break
+                model = _content_type.model_class()
+                break
+        use_class = kwargs.pop('use_class')
+        return super(use_class, cls).__new__(model, *args, **kwargs)
 
 
 class SourceConfig(Config):
-    def __unicode__(self):
-        if hasattr(self, 'databasesourceconfig'):
-            return "Database: %s" % (self.databasesourceconfig, )
+    pass
 
 
 class TargetConfig(Config):
-    def __unicode__(self):
-        if hasattr(self, 'databasetargetconfig'):
-            return "Database: %s" % (self.databasetargetconfig, )
+    pass
 
 
 class DatabaseSourceConfig(SourceConfig):
