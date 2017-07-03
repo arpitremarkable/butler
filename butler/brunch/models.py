@@ -53,50 +53,15 @@ class GenericBaseModel(BaseAuthorModel):
         self.special_object = self
         return super(GenericBaseModel, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return "%s" % self.special_object
+
     class Meta:
         abstract = True
 
 
 class Config(GenericBaseModel):
     name = models.CharField(max_length=255, unique=True)
-
-    @staticmethod
-    def __new__(cls, *args, **kwargs):
-        kwargs['use_class'] = kwargs['use_class'] if 'use_class' in kwargs else Config
-        if not issubclass(cls, kwargs['use_class']):
-            return super(kwargs['use_class'], cls).__new__(cls, *args, **kwargs)
-        model = cls
-
-        def fields():
-            return (f for f in cls._meta.concrete_fields)
-
-        for i, field in enumerate(fields()):
-            if getattr(field, 'related_model', None) is ContentType:
-                # db to py object
-                try:
-                    _content_type_id = args[i]
-                    if _content_type_id is models.base.DEFERRED:
-                        break
-                    _content_type = ContentType._default_manager.get(pk=_content_type_id)
-                except ContentType.DoesNotExist:
-                    break
-                except IndexError:
-                    try:
-                        _content_type = kwargs[field.name]
-                    except KeyError:
-                        try:
-                            _content_type = kwargs[field.attname]
-                            if _content_type_id is models.base.DEFERRED:
-                                break
-                            _content_type = ContentType._default_manager.get(
-                                pk=_content_type_id
-                            )
-                        except (KeyError, ContentType.DoesNotExist):
-                            break
-                model = _content_type.model_class()
-                break
-        use_class = kwargs.pop('use_class')
-        return super(use_class, cls).__new__(model, *args, **kwargs)
 
 
 class SourceConfig(Config):
@@ -164,14 +129,13 @@ class ScheduledTask(BaseAuthorModel, PeriodicTask):
     def save(self, *args, **kwargs):
         import json
         from brunch.tasks import execute_config
+        superb = super(ScheduledTask, self).save(*args, **kwargs)
         self.name = "%s -> %s" % (
-            self.source_config, self.target_config
+            self.source_config.special_object, self.target_config.special_object
         )
         self.task = "%s.%s" % (execute_config.__module__, execute_config.__name__)
         self.kwargs = json.dumps({
-            'source_config_id': self.source_config.id,
-            'target_config_id': self.target_config.id,
+            'scheduled_task_id': self.id,
         })
-        superb = super(ScheduledTask, self).save(*args, **kwargs)
         self.periodictask_ptr.save()
         return superb

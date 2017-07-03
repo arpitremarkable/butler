@@ -17,10 +17,11 @@ from brunch.models import ScheduledTask
 
 
 @shared_task
-def execute_config(source_config_id, target_config_id, scheduled_task_id, *args, **kwargs):
+def execute_config(scheduled_task_id, *args, **kwargs):
     task = ScheduledTask.objects.get(id=scheduled_task_id)
-    source_config = task.source_config
-    target_config = task.target_config
+    source_config = task.source_config.special_object
+    target_config = task.target_config.special_object
+    print(source_config, target_config)
     return source_config, target_config
 
     # config = build_config(source_config, target_config)
