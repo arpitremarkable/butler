@@ -44,13 +44,32 @@ class BaseAuthorModel(BaseModel):
 
 
 class Config(BaseAuthorModel):
-    pass
-
-
-class DatabaseConfig(Config):
     name = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        if hasattr(self, 'sourceconfig'):
+            return "Source: %s" % (self.sourceconfig, )
+        elif hasattr(self, 'targetconfig'):
+            return "Target: %s" % (self.targetconfig, )
+
+
+class SourceConfig(Config):
+    def __unicode__(self):
+        if hasattr(self, 'databasesourceconfig'):
+            return "Database: %s" % (self.databasesourceconfig, )
+
+
+class TargetConfig(Config):
+    def __unicode__(self):
+        if hasattr(self, 'databasetargetconfig'):
+            return "Database: %s" % (self.databasetargetconfig, )
+
+
+class DatabaseSourceConfig(SourceConfig):
+    connection_names = to_namedtuple(settings.DATABASES.keys())
+
     connection_name = models.CharField(
-        max_length=50, blank=False, choices=to_namedtuple(settings.DATABASES.keys()).__dict__.items()
+        max_length=50, blank=False, choices=connection_names.__dict__.items()
     )
     select = models.CharField(max_length=1024, blank=False)
     table = models.CharField(max_length=128, blank=False)
@@ -60,12 +79,34 @@ class DatabaseConfig(Config):
         models.CharField(max_length=50), default=list, blank=True, help_text='Column name(s) used in select'
     )
 
+    def __unicode__(self):
+        return "%s:%s (%s)" % (self.connection_name, self.table, self.name)
+
+
+class DatabaseTargetConfig(TargetConfig):
+    modes = to_namedtuple(('insert', 'insert_direct', 'truncate_insert', 'replace', 'merge', ))
+
+    connection_name = models.CharField(
+        max_length=50, blank=False, choices=to_namedtuple(settings.DATABASES.keys()).__dict__.items()
+    )
+    table = models.CharField(max_length=128, blank=False)
+    mode = models.CharField(
+        max_length=50, blank=False, choices=modes.__dict__.items()
+    )
+    merge_keys = pg_fields.ArrayField(
+        models.CharField(max_length=50), default=list, blank=True,
+        help_text='If merge mode is selected, Column name(s) used in select',
+    )
+
+    def __unicode__(self):
+        return "%s:%s (%s)" % (self.connection_name, self.table, self.name)
+
 
 class DatabaseColumnOption(BaseAuthorModel):
     value_types = to_namedtuple(('long', 'double', 'float', 'decimal', 'boolean', 'string', 'json', 'date', 'time', 'timestamp', ))
     types = to_namedtuple(('boolean', 'long', 'double', 'string', 'json', 'timestamp', ))
 
-    config = models.ForeignKey(DatabaseConfig)
+    config = models.ForeignKey(Config)
     name = models.CharField(max_length=255, help_text='Column name(s) used in select')
     value_type = models.CharField(blank=True, max_length=50, verbose_name='Cast as', choices=value_types.__dict__.items())
     type = models.CharField(blank=True, max_length=50, verbose_name='Convert to', choices=types.__dict__.items())
@@ -74,18 +115,21 @@ class DatabaseColumnOption(BaseAuthorModel):
     )
 
 
-class ScheduledTask(PeriodicTask):
-    config = models.OneToOneField(Config)
+class ScheduledTask(BaseAuthorModel, PeriodicTask):
+    source_config = models.ForeignKey(SourceConfig)
+    target_config = models.ForeignKey(TargetConfig)
 
     def save(self, *args, **kwargs):
         import json
         from brunch.tasks import execute_config
-        self.name = self.config.name
+        self.name = "%s -> %s" % (
+            self.source_config, self.target_config
+        )
         self.task = "%s.%s" % (execute_config.__module__, execute_config.__name__)
         self.kwargs = json.dumps({
-            'config_id': self.config.id,
+            'source_config_id': self.source_config.id,
+            'target_config_id': self.target_config.id,
         })
         superb = super(ScheduledTask, self).save(*args, **kwargs)
-        # PeriodicTask.save(self, *args, **kwargs)
         self.periodictask_ptr.save()
         return superb

@@ -3,36 +3,30 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from brunch.forms import DatabaseColumnOptionModelForm, DatabaseConfigModelForm
-from brunch.models import DatabaseColumnOption, DatabaseConfig, ScheduledTask
+from brunch.forms import BaseModelForm
+from brunch.models import (DatabaseColumnOption, DatabaseSourceConfig,
+                           DatabaseTargetConfig, ScheduledTask)
 
 
 class DatabaseColumnOptionInlineForm(admin.TabularInline):
-    form = DatabaseColumnOptionModelForm
+    form = BaseModelForm
     model = DatabaseColumnOption
 
 
-class ScheduledTaskInlineForm(admin.TabularInline):
+class ScheduledTaskInlineForm(admin.ModelAdmin):
+    form = BaseModelForm
     model = ScheduledTask
-    fields = ('interval', 'enabled', )
+    fields = ('source_config', 'target_config', 'interval', 'enabled', )
+    list_display = ('__unicode__', 'last_run_at', 'total_run_count', 'interval', 'enabled', )
 
 
-class DatabaseConfigAdmin(admin.ModelAdmin):
-    form = DatabaseConfigModelForm
+class ConfigAdmin(admin.ModelAdmin):
+    form = BaseModelForm
     inlines = [
         DatabaseColumnOptionInlineForm,
-        ScheduledTaskInlineForm,
     ]
-    list_display = ('__unicode__', 'last_run_at', 'total_run_count', )
-
-    def last_run_at(self, instance):
-        return instance.scheduledtask.last_run_at
-
-    def total_run_count(self, instance):
-        return instance.scheduledtask.total_run_count
-
-    def save_model(self, request, obj, *args, **kwargs):
-        return super(DatabaseConfigAdmin, self).save_model(request, obj, *args, **kwargs)
 
 
-admin.site.register(DatabaseConfig, DatabaseConfigAdmin)
+admin.site.register(DatabaseSourceConfig, ConfigAdmin)
+admin.site.register(DatabaseTargetConfig, ConfigAdmin)
+admin.site.register(ScheduledTask, ScheduledTaskInlineForm)

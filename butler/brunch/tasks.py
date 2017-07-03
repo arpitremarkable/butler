@@ -2,16 +2,26 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 
+from brunch.models import ScheduledTask
+
+
+# def build_config(source_config, target_config):
+#     def get_yaml(dic):
+#         return yaml.dump(dic)
+
+#     config = {
+#         'in': input.config,
+#         'out': output.config,
+#     }
+#     print(yaml.dump(config))
+
 
 @shared_task
-def execute_config(config_id, *args, **kwargs):
-    from brunch.models import Config
-    # from brunch.tools import Config
-    config = None
-    base_config = Config.objects.get(id=config_id)
-    if hasattr(base_config, 'databaseconfig'):
-        config = base_config.databaseconfig
-    return config
+def execute_config(source_config_id, target_config_id, scheduled_task_id, *args, **kwargs):
+    task = ScheduledTask.objects.get(id=scheduled_task_id)
+    source_config = task.source_config
+    target_config = task.target_config
+    return source_config, target_config
 
-    # if config
-    #     build_config(database_config)
+    # config = build_config(source_config, target_config)
+    # write_config(config, )

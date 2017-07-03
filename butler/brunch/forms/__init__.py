@@ -1,16 +1,21 @@
-from brunch.models import DatabaseConfig, DatabaseColumnOption
+from brunch.models import DatabaseSourceConfig, DatabaseTargetConfig, DatabaseColumnOption
 
 from django import forms
 
 
 class BaseModelForm(forms.ModelForm):
     class Meta:
-        exclude = ('creator', 'editor', 'default_column_options', 'column_options', )
+        exclude = ('creator', 'editor', )
 
 
-class DatabaseConfigModelForm(BaseModelForm):
+class DatabaseSourceConfigModelForm(BaseModelForm):
     class Meta(BaseModelForm.Meta):
-        model = DatabaseConfig
+        model = DatabaseSourceConfig
+
+
+class DatabaseTargetConfigModelForm(BaseModelForm):
+    class Meta(BaseModelForm.Meta):
+        model = DatabaseTargetConfig
 
 
 class DatabaseColumnOptionModelForm(BaseModelForm):
