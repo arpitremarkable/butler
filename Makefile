@@ -21,3 +21,7 @@ ifeq ($(OS),Linux)
 deps:
 		sudo apt-get install python-psycopg2
 endif
+
+start:
+	celery -A butler worker -l debug
+	celery beat -A butler -l debug
