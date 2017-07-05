@@ -53,16 +53,13 @@ class GenericBaseModel(BaseAuthorModel):
         self.special_object = self
         return super(GenericBaseModel, self).save(*args, **kwargs)
 
-    def __unicode__(self):
-        return "%s" % self.special_object
-
     class Meta:
         abstract = True
 
 
 class Config(GenericBaseModel):
     NATURE = 'generic'
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
 
 
 class SourceConfig(Config):
@@ -89,17 +86,11 @@ class DatabaseSourceConfig(SourceConfig):
         models.CharField(max_length=50), default=list, blank=True, help_text='Column name(s) used in select'
     )
 
-    def __unicode__(self):
-        return "%s:%s (%s)" % (self.connection_name, self.table, self.name)
-
 
 class ExplorerSourceConfig(SourceConfig):
     NATURE = 'explorer'
     query = models.OneToOneField('explorer.Query')
     batch_size = models.IntegerField(blank=False, default=10000)
-
-    def __unicode__(self):
-        return "%s" % (self.name, )
 
 
 class DatabaseTargetConfig(TargetConfig):
@@ -117,9 +108,6 @@ class DatabaseTargetConfig(TargetConfig):
         models.CharField(max_length=50), default=list, blank=True,
         help_text='If merge mode is selected, Column name(s) used in select',
     )
-
-    def __unicode__(self):
-        return "%s:%s (%s)" % (self.connection_name, self.table, self.name)
 
 
 class DatabaseColumnOption(BaseAuthorModel):

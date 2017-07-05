@@ -17,8 +17,8 @@ class DatabaseColumnOptionInlineForm(admin.TabularInline):
 class ScheduledTaskInlineForm(admin.ModelAdmin):
     form = BaseModelForm
     model = ScheduledTask
-    fields = ('source_config', 'target_config', 'interval', 'enabled', )
-    list_display = ('__unicode__', 'last_run_at', 'total_run_count', 'interval', 'enabled', )
+    fields = ('source_config', 'target_config', 'interval', 'enabled', 'crontab', )
+    list_display = ('__unicode__', 'last_run_at', 'total_run_count', 'interval', 'enabled', 'crontab', )
 
 
 class ConfigAdmin(admin.ModelAdmin):
