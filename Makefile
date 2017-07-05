@@ -13,10 +13,11 @@ embulk:
 	$$EMBULK_EXEC gem install embulk-output-redshift
 	mkdir -p $$EMBULK_PATH/../brunch/configs
 
+ifeq ($(OS),Darwin)
 deps:
-	ifeq ($(OS),Darwin)
 		brew install postgresql
-	endif
-	ifeq ($(OS),LINUX)
+endif
+ifeq ($(OS),Linux)
+deps:
 		sudo apt-get install python-psycopg2
-	endif
+endif
