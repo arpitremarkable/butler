@@ -1,4 +1,4 @@
-export EMBULK_PATH = ~/.embulk/bin
+export EMBULK_PATH = $(HOME)/.embulk/bin
 export EMBULK_EXEC = embulk
 export PATH := $(EMBULK_PATH):$(PATH)
 # export EMBULK_BUNDLE = ./butler/embulk/embulk_bundle
