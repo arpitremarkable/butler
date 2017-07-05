@@ -3,3 +3,5 @@ django-sql-explorer==1.1.1
 git+https://github.com/celery/celery.git#egg=celery
 django-celery-beat==1.0.1
 redis==2.10.5
+psycopg2==2.7.1
+git+ssh://git@github.com/shimizukawa/django-redshift-backend.git@master
