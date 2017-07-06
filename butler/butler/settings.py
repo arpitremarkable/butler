@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -129,6 +130,9 @@ EXPLORER_SCHEMA_BUILDERS = [
     ('redshift', 'explorer.schema.PostgreSQLSchema'),
     ('mysql', 'explorer.schema.MySQLSchema'),
 ]
+
+GRAPPELLI_ADMIN_TITLE = 'Brunch'
+GRAPPELLI_SWITCH_USER = True
 
 try:
     from local_settings import *  # noqa
