@@ -39,6 +39,7 @@ def execute(source_config, target_config, task):
             using=settings.EXPLORER_CONNECTION_NAME,
             query=source_config.query.sql,
             column_options=get_column_options(source_config),
+            fetch_rows=source_config.batch_size,
         )
     else:
         raise Exception('Not implemented %s input type' % (source_config.NATURE, ))
