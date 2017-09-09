@@ -19,9 +19,23 @@ class ScheduledTaskInlineForm(admin.ModelAdmin):
     form = BaseModelForm
     model = ScheduledTask
     fields = ('source_config', 'target_config', 'interval', 'enabled', 'crontab', )
-    list_display = ('__unicode__', 'last_run_at', 'total_run_count', 'interval', 'enabled', 'crontab', )
+    list_display = (
+        '__unicode__', 'last_run_at', 'total_run_count', 'interval', 'enabled', 'crontab',
+        'source_details', 'target_details',
+    )
     list_editable = ('interval', )
     actions = ('force_run', 'show_log', )
+
+    def source_details(self, instance):
+        return self._config_detail(instance.source_config)
+
+    def target_details(self, instance):
+        return self._config_detail(instance.target_config)
+
+    def _config_detail(self, config):
+        return mark_safe('<br/>'.join(("%s" % (
+            config,
+        )).split(',')))
 
     def force_run(self, request, queryset):
         for task in queryset:

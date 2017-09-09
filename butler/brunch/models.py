@@ -58,6 +58,13 @@ class GenericBaseModel(BaseAuthorModel):
     class Meta:
         abstract = True
 
+    def __unicode__(self):
+        important_info = {'table', 'connection_name', 'mode', 'NATURE', }
+        msg = []
+        for info in important_info.intersection(self.special_object.__dict__):
+            msg.append("%(info_lower)s: %%(%(info)s)s" % {'info_lower': info.lower(), 'info': info} % self.special_object.__dict__)
+        return ', '.join(msg)
+
 
 class Config(GenericBaseModel):
     NATURE = 'generic'
