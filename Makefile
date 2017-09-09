@@ -13,9 +13,6 @@ embulk:
 	$$EMBULK_EXEC gem install embulk-output-redshift
 	mkdir -p $$EMBULK_PATH/../brunch/configs
 
-env:
-	virtualenv .virtualenv
-
 deps:
 ifeq ($(OS),Darwin)
 		brew install postgresql
@@ -23,10 +20,7 @@ endif
 ifeq ($(OS),Linux)
 		sudo apt-get install python-psycopg2
 endif
-		source .virtualenv/bin/activate
 		pip install -r requirements.txt
 
 start:
-	source .virtualenv/bin/activate
-	celery -A butler worker -l debug
-	celery beat -A butler -l debug
+	honcho -f Procfile start

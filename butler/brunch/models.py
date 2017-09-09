@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -126,6 +128,15 @@ class DatabaseColumnOption(BaseAuthorModel):
 class ScheduledTask(BaseAuthorModel, PeriodicTask):
     source_config = models.ForeignKey(SourceConfig)
     target_config = models.ForeignKey(TargetConfig)
+
+    def run(self):
+        from brunch import tasks
+        tasks.unbound_execute_config.delay(scheduled_task_id=self.id)
+
+    def get_latest_log(self):
+        with open(os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stdout' % self.id), 'r') as f:
+            log_content = f.read()
+        return log_content
 
     def save(self, *args, **kwargs):
         import json
