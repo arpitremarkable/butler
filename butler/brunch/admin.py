@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin, messages
+from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from brunch.forms import BaseModelForm
@@ -35,7 +36,13 @@ class ScheduledTaskInlineForm(admin.ModelAdmin):
     def _config_detail(self, config):
         return mark_safe('<br/>'.join(("%s" % (
             config,
-        )).split(',')))
+        )).split(',') + [self._config_link(config)]))
+
+    def _config_link(self, config):
+        return '<a href="%s">Edit</a>' % (
+            reverse("admin:%s_%s_change" % (self.opts.app_label, config.special_object._meta.model_name), args=(config.pk,)),
+
+        )
 
     def force_run(self, request, queryset):
         for task in queryset:
