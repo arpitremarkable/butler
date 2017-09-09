@@ -16,7 +16,7 @@ class DatabaseColumnOptionInlineForm(admin.TabularInline):
     model = DatabaseColumnOption
 
 
-class ScheduledTaskInlineForm(admin.ModelAdmin):
+class ScheduledTaskForm(admin.ModelAdmin):
     form = BaseModelForm
     model = ScheduledTask
     fields = ('source_config', 'target_config', 'interval', 'enabled', 'crontab', )
@@ -67,7 +67,18 @@ class ConfigAdmin(admin.ModelAdmin):
     ]
 
 
+class ExplorerConfigAdmin(admin.ModelAdmin):
+    form = BaseModelForm
+    inlines = [
+        DatabaseColumnOptionInlineForm,
+    ]
+    readonly_fields = ('sql',)
+
+    def sql(self, instance):
+        return mark_safe("<pre>%s</pre>" % instance.query.sql)
+
+
 admin.site.register(DatabaseSourceConfig, ConfigAdmin)
 admin.site.register(DatabaseTargetConfig, ConfigAdmin)
-admin.site.register(ExplorerSourceConfig, ConfigAdmin)
-admin.site.register(ScheduledTask, ScheduledTaskInlineForm)
+admin.site.register(ExplorerSourceConfig, ExplorerConfigAdmin)
+admin.site.register(ScheduledTask, ScheduledTaskForm)
