@@ -8,9 +8,9 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
-from django_celery_beat.models import PeriodicTask
 
 from brunch.utils import to_namedtuple
+from django_celery_beat.models import PeriodicTask
 
 
 # Create your models here.
@@ -63,7 +63,7 @@ class GenericBaseModel(BaseAuthorModel):
         msg = []
         for info in important_info.intersection(self.special_object.__dict__):
             msg.append("%(info_lower)s: %%(%(info)s)s" % {'info_lower': info.lower(), 'info': info} % self.special_object.__dict__)
-        return ', '.join(msg)
+        return ', '.join(msg) or super(GenericBaseModel, self).__unicode__()
 
 
 class Config(GenericBaseModel):

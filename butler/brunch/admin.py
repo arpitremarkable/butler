@@ -67,11 +67,7 @@ class ConfigAdmin(admin.ModelAdmin):
     ]
 
 
-class ExplorerConfigAdmin(admin.ModelAdmin):
-    form = BaseModelForm
-    inlines = [
-        DatabaseColumnOptionInlineForm,
-    ]
+class ExplorerConfigAdmin(ConfigAdmin):
     readonly_fields = ('sql',)
 
     def sql(self, instance):
