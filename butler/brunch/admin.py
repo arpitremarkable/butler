@@ -68,7 +68,12 @@ class ConfigAdmin(admin.ModelAdmin):
 
 
 class ExplorerConfigAdmin(ConfigAdmin):
-    readonly_fields = ('sql',)
+    readonly_fields = ('sql', )
+    exclude = ('name', 'creator', 'editor', '_content_type')
+
+    def save_model(self, request, obj, form, change):
+        obj.name = form.cleaned_data['query'].__unicode__()
+        return super(ExplorerConfigAdmin, self).save_model(request, obj, form, change)
 
     def sql(self, instance):
         return mark_safe("<pre>%s</pre>" % instance.query.sql)

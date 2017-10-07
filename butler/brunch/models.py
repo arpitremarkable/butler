@@ -8,9 +8,9 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 
 from brunch.utils import to_namedtuple
-from django_celery_beat.models import PeriodicTask
 
 
 # Create your models here.
@@ -48,6 +48,7 @@ class BaseAuthorModel(BaseModel):
 
 
 class GenericBaseModel(BaseAuthorModel):
+    important_info = ()
     _content_type = models.ForeignKey(ContentType)
     special_object = GenericForeignKey('_content_type', 'id')
 
@@ -58,11 +59,18 @@ class GenericBaseModel(BaseAuthorModel):
     class Meta:
         abstract = True
 
+    def get_important_info(self):
+        info = {'table', 'connection_name', 'mode', 'NATURE', }
+        return info.union(set(self.special_object.important_info))
+
     def __unicode__(self):
-        important_info = {'table', 'connection_name', 'mode', 'NATURE', }
+        important_info = self.get_important_info()
         msg = []
-        for info in important_info.intersection(self.special_object.__dict__):
-            msg.append("%(info_lower)s: %%(%(info)s)s" % {'info_lower': info.lower(), 'info': info} % self.special_object.__dict__)
+        for info in important_info:
+            if hasattr(self.special_object, info):
+                msg.append("%(info_lower)s: %%(%(info)s)s" % {'info_lower': info.lower(), 'info': info} % {
+                    info: getattr(self.special_object, info)
+                })
         return ', '.join(msg) or super(GenericBaseModel, self).__unicode__()
 
 
@@ -98,8 +106,12 @@ class DatabaseSourceConfig(SourceConfig):
 
 class ExplorerSourceConfig(SourceConfig):
     NATURE = 'explorer'
+    important_info = ('name', )
     query = models.OneToOneField('explorer.Query')
     batch_size = models.IntegerField(blank=False, default=10000)
+    connection_name = models.CharField(
+        max_length=50, blank=False, choices=to_namedtuple(settings.DATABASES.keys()).__dict__.items()
+    )
 
 
 class DatabaseTargetConfig(TargetConfig):

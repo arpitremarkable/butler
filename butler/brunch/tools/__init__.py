@@ -36,7 +36,7 @@ def execute(source_config, target_config, task):
         )
     elif source_config.NATURE == 'explorer':
         input = DatabaseInputConfig(
-            using=settings.EXPLORER_CONNECTION_NAME,
+            using=source_config.connection_name,
             query=source_config.query.sql,
             column_options=get_column_options(source_config),
             fetch_rows=source_config.batch_size,
