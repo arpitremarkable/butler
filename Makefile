@@ -11,6 +11,7 @@ embulk:
 	$$EMBULK_EXEC gem install embulk-input-postgresql
 	$$EMBULK_EXEC gem install embulk-output-command
 	$$EMBULK_EXEC gem install embulk-output-redshift
+	$$EMBULK_EXEC gem install embulk-input-redshift
 	mkdir -p $$EMBULK_PATH/../brunch/configs
 
 deps:
