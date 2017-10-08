@@ -72,6 +72,7 @@ def execute(source_config, target_config, task):
     config_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.yaml' % task.id)
     resume_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d_resume_state.yaml' % task.id)
     result_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stdout' % task.id)
+    error_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stderr' % task.id)
     config_diff_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_diff_task_%d.yaml' % task.id)
     with open(seed_config_file, 'w+') as outfile:
         yaml.safe_dump(build_config(input, output), outfile, default_flow_style=False)
@@ -87,16 +88,17 @@ def execute(source_config, target_config, task):
         process.wait()
 
     with open(result_file, 'w+') as result_file_fd:
-        from subprocess import Popen
-        process = Popen([' '.join([
-            os.path.join(settings.EMBULK_PATH, 'embulk'),
-            'run',
-            config_file,
-            '-r',
-            resume_file,
-            '-c' if input.PRESERVE_CONFIG_DIFF else '',
-            config_diff_file if input.PRESERVE_CONFIG_DIFF else '',
-        ])], stdout=result_file_fd, shell=True)
-        ret_code = process.wait()
-        result_file_fd.flush()
-        return ret_code
+        with open(error_file, 'w+') as error_file_fd:
+            from subprocess import Popen
+            process = Popen([' '.join([
+                os.path.join(settings.EMBULK_PATH, 'embulk'),
+                'run',
+                config_file,
+                '-r',
+                resume_file,
+                '-c' if input.PRESERVE_CONFIG_DIFF else '',
+                config_diff_file if input.PRESERVE_CONFIG_DIFF else '',
+            ])], stderr=error_file_fd, stdout=result_file_fd, shell=True)
+            ret_code = process.wait()
+            result_file_fd.flush()
+            return ret_code

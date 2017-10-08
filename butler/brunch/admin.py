@@ -57,7 +57,12 @@ class ScheduledTaskForm(admin.ModelAdmin):
             messages.info(request, mark_safe("""
                 %s
                 <pre>%s</pre>
-            """ % (task, log_content, )))
+            """ % (task, log_content['info'], )))
+
+            messages.error(request, mark_safe("""
+                %s
+                <pre>%s</pre>
+            """ % (task, log_content['error'], )))
     show_log.short_description = "Show latest log for selected tasks"
 
 
