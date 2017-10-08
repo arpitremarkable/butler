@@ -44,7 +44,7 @@ class BaseAuthorModel(BaseModel):
     editor = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, related_name='%(app_label)s_%(class)s_last_modified')
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         abstract = True
 
 
@@ -57,7 +57,7 @@ class GenericBaseModel(BaseAuthorModel):
         self.special_object = self
         return super(GenericBaseModel, self).save(*args, **kwargs)
 
-    class Meta:
+    class Meta(BaseAuthorModel.Meta):
         abstract = True
 
     def get_important_info(self):
