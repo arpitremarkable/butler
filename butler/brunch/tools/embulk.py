@@ -1,6 +1,8 @@
 import os
 import tempfile
 
+from django.conf import settings
+
 
 class EmbulkConfig(object):
     pass
@@ -9,7 +11,6 @@ class EmbulkConfig(object):
 class DatabaseConfig(object):
 
     def __init__(self, using, **options):
-        from django.conf import settings
         from django.db import connections
         self.connection = connections[using]
         self.config = dict(filter(lambda d: bool(d[1]), {
@@ -30,6 +31,32 @@ class InputConfig(EmbulkConfig):
 
 class OutputConfig(EmbulkConfig):
     pass
+
+
+class CSVFileInputConfig(InputConfig):
+
+    @staticmethod
+    def _get_columns(column_options):
+        columns = []
+        for column, options in column_options.items():
+            columns.append({'name': column, 'type': options['type'], 'format': options['timestamp_format']})
+        return columns
+
+    def __init__(self, path, column_options, **options):
+        self.config = dict(filter(lambda d: bool(d[1]), {
+            'type': 'file',
+            'path_prefix': path,
+            'parser': {
+                'charset': 'UTF-8',
+                'newline': 'CRLF',
+                'type': 'csv',
+                'columns': self._get_columns(column_options),
+                'stop_on_invalid_record': True,
+                'skip_header_lines': 1,
+                'default_timezone': settings.TIME_ZONE,
+            }
+        }.items()))
+        self.config.update(options)
 
 
 class DatabaseInputConfig(DatabaseConfig, InputConfig):

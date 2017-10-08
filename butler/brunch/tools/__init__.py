@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from brunch.tools.embulk import DatabaseInputConfig, DatabaseOutputConfig
+from brunch.tools.embulk import CSVFileInputConfig, DatabaseInputConfig, DatabaseOutputConfig
 
 import os
 import yaml
@@ -41,6 +41,12 @@ def execute(source_config, target_config, task):
             column_options=get_column_options(source_config),
             fetch_rows=source_config.batch_size,
         )
+    elif source_config.NATURE == 'file':
+        # Only csv supported right now
+        input = CSVFileInputConfig(
+            path=source_config.file.path,
+            column_options=get_column_options(source_config),
+        )
     else:
         raise Exception('Not implemented %s input type' % (source_config.NATURE, ))
 
@@ -62,12 +68,22 @@ def execute(source_config, target_config, task):
         }
         return config
 
+    seed_config_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'seed_config_task_%d.yaml' % task.id)
     config_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.yaml' % task.id)
     resume_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d_resume_state.yaml' % task.id)
     result_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stdout' % task.id)
     config_diff_file = os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_diff_task_%d.yaml' % task.id)
-    with open(config_file, 'w+') as outfile:
+    with open(seed_config_file, 'w+') as outfile:
         yaml.safe_dump(build_config(input, output), outfile, default_flow_style=False)
+        from subprocess import Popen
+        process = Popen([' '.join([
+            os.path.join(settings.EMBULK_PATH, 'embulk'),
+            'guess',
+            seed_config_file,
+            '-o',
+            config_file,
+        ])], shell=True)
+        process.wait()
 
     with open(result_file, 'w+') as result_file_fd:
         from subprocess import Popen

@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from brunch.forms import BaseModelForm
 from brunch.models import (DatabaseColumnOption, DatabaseSourceConfig,
                            DatabaseTargetConfig, ExplorerSourceConfig,
-                           ScheduledTask)
+                           FileSourceConfig, ScheduledTask)
 
 
 class DatabaseColumnOptionInlineForm(admin.TabularInline):
@@ -80,6 +80,7 @@ class ExplorerConfigAdmin(ConfigAdmin):
 
 
 admin.site.register(DatabaseSourceConfig, ConfigAdmin)
+admin.site.register(FileSourceConfig, ConfigAdmin)
 admin.site.register(DatabaseTargetConfig, ConfigAdmin)
 admin.site.register(ExplorerSourceConfig, ExplorerConfigAdmin)
 admin.site.register(ScheduledTask, ScheduledTaskForm)

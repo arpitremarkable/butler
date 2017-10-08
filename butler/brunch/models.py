@@ -114,6 +114,12 @@ class ExplorerSourceConfig(SourceConfig):
     )
 
 
+class FileSourceConfig(SourceConfig):
+    NATURE = 'file'
+    important_info = ('name', )
+    file = models.FileField(upload_to='FileSourceConfig/')
+
+
 class DatabaseTargetConfig(TargetConfig):
     NATURE = 'database'
     modes = to_namedtuple(('insert', 'insert_direct', 'truncate_insert', 'replace', 'merge', ))
