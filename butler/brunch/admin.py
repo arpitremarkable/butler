@@ -25,6 +25,7 @@ class ScheduledTaskForm(admin.ModelAdmin):
         'source_details', 'target_details',
     )
     list_editable = ('interval', )
+    search_fields = ('name', )
     actions = ('force_run', 'show_log', )
 
     def source_details(self, instance):
