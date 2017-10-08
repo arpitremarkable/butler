@@ -26,7 +26,7 @@ class DatabaseConfig(object):
 
 
 class InputConfig(EmbulkConfig):
-    pass
+    PRESERVE_CONFIG_DIFF = True
 
 
 class OutputConfig(EmbulkConfig):
@@ -34,6 +34,7 @@ class OutputConfig(EmbulkConfig):
 
 
 class CSVFileInputConfig(InputConfig):
+    PRESERVE_CONFIG_DIFF = False
 
     @staticmethod
     def _get_columns(column_options):

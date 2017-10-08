@@ -93,8 +93,10 @@ def execute(source_config, target_config, task):
             config_file,
             '-r',
             resume_file,
-            '-c',
-            config_diff_file
+            '-c' if input.PRESERVE_CONFIG_DIFF else '',
+            config_diff_file if input.PRESERVE_CONFIG_DIFF else '',
+            '-l',
+            'debug',
         ])], stdout=result_file_fd, shell=True)
         ret_code = process.wait()
         result_file_fd.flush()
