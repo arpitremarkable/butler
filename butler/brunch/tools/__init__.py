@@ -76,6 +76,7 @@ def execute(source_config, target_config, task):
     with open(seed_config_file, 'w+') as outfile:
         yaml.safe_dump(build_config(input, output), outfile, default_flow_style=False)
         from subprocess import Popen
+        os.remove(config_file)
         process = Popen([' '.join([
             os.path.join(settings.EMBULK_PATH, 'embulk'),
             'guess',
