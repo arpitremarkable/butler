@@ -30,11 +30,12 @@ class AbstractBaseModel(object):
 
 class BaseModel(AbstractBaseModel, models.Model):
 
-    created_on = models.DateTimeField(auto_now_add=True)
-    modified_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+    modified_on = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
         abstract = True
+        ordering = ['-modified_on']
 
 
 class BaseAuthorModel(BaseModel):
