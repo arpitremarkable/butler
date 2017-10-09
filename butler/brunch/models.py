@@ -161,10 +161,16 @@ class ScheduledTask(BaseAuthorModel, PeriodicTask):
 
     def get_latest_log(self):
         log_content = {}
-        with open(os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stdout' % self.id), 'r') as f:
-            log_content['info'] = f.read()
-        with open(os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stderr' % self.id), 'r') as f:
-            log_content['error'] = f.read()
+        try:
+            with open(os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stdout' % self.id), 'r') as f:
+                log_content['info'] = f.read()
+        except IOError:
+            log_content['info'] = ''
+        try:
+            with open(os.path.join(settings.EMBULK_PATH, '../brunch/configs/', 'config_task_%d.stderr' % self.id), 'r') as f:
+                log_content['error'] = f.read()
+        except IOError:
+            log_content['error'] = ''
         return log_content
 
     def save(self, *args, **kwargs):
